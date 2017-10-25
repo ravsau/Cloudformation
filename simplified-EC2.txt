@@ -8,50 +8,11 @@
     "KeyName" : {
       "Description" : "EC2 Key Pair for SSH Access, you must have created these prior to running this.",
       "Type" : "String",
-      "Default" : "cloudform-key",
-      "MinLength": "1",
-      "MaxLength": "64",
-      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
-      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
-    },
-
-    "VpcId" : {
-      "Type": "String",
-      "Description" : "vpc-7c5f6905"
-
-    },
-
-    "AvailabilityZone1" : {
-      "Description" : "us-east-1b",
-
-
-      "Type" : "String"
-
-    },
-
-    "InstanceType" : {
-      "Description" : "Instance type for node that's being created.",
-      "Type" : "String",
-      "Default" : "t2.micro",
-      "AllowedValues" : [
-        "t2.micro",
-        "m1.small",
-        "c1.medium"
-      ],
-      "ConstraintDescription" : "Acceptable values are t2.micro, m1.small or c1.medium"
-    },
-
-    "PubNet01" : {
-      "Description" : "subnet-a9bae785",
-
-      "Type": "String"
-    },
-
-    "YourPublicRange" : {
-      "Description" : "Address range in CIDR format for your public address range for access to the instance.",
-      "Type" : "String",
-      "ConstraintDescription" : "172.16.0.0/24"
+      "Default" : "cloudform-key"
+  
     }
+
+   
 
   },
 
@@ -63,35 +24,22 @@
       "Type" : "AWS::EC2::Instance",
       "Properties" : {
         "KeyName" : { "Ref" : "KeyName" },
-        "InstanceType" : { "Ref" : "InstanceType" },
+        "InstanceType" :  "t2.micro" ,
         "ImageId" : "ami-8c1be5f6",
-        "NetworkInterfaces" : [
-          { "DeviceIndex" : "0",
-            "AssociatePublicIpAddress" : "true",
-            "DeleteOnTermination" : "true",
-            "SubnetId" : { "Ref" : "PubNet01" },
-            "GroupSet" : [ { "Ref" : "SimpleInstanceSg" } ]
-          }
-        ]
+        "SecurityGroups" : [ { "Ref" : "SimpleInstanceSg" } ]
       }
     },
 
     "SimpleInstanceSg" : {
-      "Type" : "AWS::EC2::SecurityGroup",
+   "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
-        "GroupDescription" : "Rules for allowing access to this Amazon Linux Instance",
-        "VpcId" : { "Ref" : "VpcId" }
-      }
-    },
-
-    "AllowSshFromPublic" : {
-      "Type" : "AWS::EC2::SecurityGroupIngress",
-      "Properties" : {
-        "GroupId" : { "Ref" : "SimpleInstanceSg" },
-        "IpProtocol" : "tcp",
-		"FromPort" : "22",
-		"ToPort" : "22",
-		"CidrIp" : { "Ref" : "YourPublicRange" }
+        "GroupDescription" : "Enable SSH access via port 22",
+        "SecurityGroupIngress" : [ {
+          "IpProtocol" : "tcp",
+          "FromPort" : "22",
+          "ToPort" : "22",
+          "CidrIp" : "0.0.0.0/0"
+        } ]
       }
     }
   }
