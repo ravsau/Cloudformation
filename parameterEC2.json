@@ -1,0 +1,25 @@
+[
+
+{"ParameterKey":"AvailabilityZone1" 
+,
+"ParameterValue":"us-east-1b"
+},
+{
+
+"ParameterKey" :"PubNet01"
+,
+"ParameterValue": "subnet-a9bae785"
+},
+{
+"ParameterKey" :"VpcId"
+,
+"ParameterValue" : "vpc-7c5f6905" 
+},
+{
+"ParameterKey": "YourPublicRange" 
+,
+"ParameterValue":"172.16.0.0/24"
+}
+
+ 
+]

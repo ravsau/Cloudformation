@@ -1,0 +1,130 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "Deploy a simple Amazon Linux Instance and allow SSH connectivity.",
+
+  "Parameters": {
+
+    "KeyName" : {
+      "Description" : "EC2 Key Pair for SSH Access, you must have created these prior to running this.",
+      "Type" : "String",
+      "Default" : "cloudform-key",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
+    },
+
+    "VpcId" : {
+      "Type": "String",
+      "Description" : "vpc-7c5f6905"
+
+    },
+
+    "AvailabilityZone1" : {
+      "Description" : "us-east-1b",
+
+
+      "Type" : "String"
+
+    },
+
+    "InstanceType" : {
+      "Description" : "Instance type for node that's being created.",
+      "Type" : "String",
+      "Default" : "t2.micro",
+      "AllowedValues" : [
+        "t2.micro",
+        "m1.small",
+        "c1.medium"
+      ],
+      "ConstraintDescription" : "Acceptable values are t2.micro, m1.small or c1.medium"
+    },
+
+    "PubNet01" : {
+      "Description" : "subnet-a9bae785",
+
+      "Type": "String"
+    },
+
+    "YourPublicRange" : {
+      "Description" : "Address range in CIDR format for your public address range for access to the instance.",
+      "Type" : "String",
+      "ConstraintDescription" : "172.16.0.0/24"
+    }
+
+  },
+
+  "Mappings" : {
+
+    "Ami" : {
+      "us-east-1"      : { "AMI" : "ami-8c1be5f6" },
+      "us-west-2"      : { "AMI" : "ami-af86c69f" },
+      "us-west-1"      : { "AMI" : "ami-b63210f3" },
+      "eu-west-1"      : { "AMI" : "ami-3c5f5748" },
+      "ap-southeast-1" : { "AMI" : "ami-ba7538e8" },
+      "ap-southeast-2" : { "AMI" : "ami-b6df4e8c" },
+      "ap-northeast-1" : { "AMI" : "ami-5d7dfa5c" },
+      "sa-east-1"      : { "AMI" : "ami-89c81394" }
+    }
+  },
+
+
+  "Resources": {
+
+    "SimpleInstance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : { "Ref" : "KeyName" },
+        "InstanceType" : { "Ref" : "InstanceType" },
+        "ImageId" : { "Fn::FindInMap" : [ "Ami", { "Ref" : "AWS::Region" }, "AMI" ]},
+        "NetworkInterfaces" : [
+          { "DeviceIndex" : "0",
+            "AssociatePublicIpAddress" : "true",
+            "DeleteOnTermination" : "true",
+            "SubnetId" : { "Ref" : "PubNet01" },
+            "GroupSet" : [ { "Ref" : "SimpleInstanceSg" } ]
+          }
+        ]
+      }
+    },
+
+    "SimpleInstanceSg" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Rules for allowing access to this Amazon Linux Instance",
+        "VpcId" : { "Ref" : "VpcId" }
+      }
+    },
+
+    "AllowSshFromPublic" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Properties" : {
+        "GroupId" : { "Ref" : "SimpleInstanceSg" },
+        "IpProtocol" : "tcp",
+		"FromPort" : "22",
+		"ToPort" : "22",
+		"CidrIp" : { "Ref" : "YourPublicRange" }
+      }
+    }
+  },
+
+
+  "Outputs" : {
+
+	"InstanceDns" : {
+      "Value" : {
+        "Fn::GetAtt" : [ "SimpleInstance", "PublicDnsName" ]
+      },
+      "Description" : "Public DNS Name of our Amazon Linux Instnace."
+    },
+
+    "InstancePublicIp" : {
+      "Value" : {
+        "Fn::GetAtt" : [ "SimpleInstance", "PublicIp" ]
+      },
+      "Description" : "Public IP Name of our Amazon Linux Instance."
+    }
+
+  }
+}
