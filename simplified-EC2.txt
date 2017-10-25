@@ -11,14 +11,9 @@
       "Default" : "cloudform-key"
   
     }
+},
 
-   
-
-  },
-
- 
-
-  "Resources": {
+ "Resources": {
 
     "SimpleInstance" : {
       "Type" : "AWS::EC2::Instance",
@@ -26,16 +21,29 @@
         "KeyName" : { "Ref" : "KeyName" },
         "InstanceType" :  "t2.micro" ,
         "ImageId" : "ami-8c1be5f6",
-        "SecurityGroups" : [ { "Ref" : "SimpleInstanceSg" } ]
+       
+	"NetworkInterfaces" : [{
+          "GroupSet"                 : [{ "Ref" : "SimpleInstanceSg" }],
+          "AssociatePublicIpAddress" : "true",
+          "DeviceIndex"              : "0",
+          "DeleteOnTermination"      : "true",
+          "SubnetId"                 : "subnet-a9bae785"
+        }]
+       
       }
     },
 
     "SimpleInstanceSg" : {
    "Type" : "AWS::EC2::SecurityGroup",
+   
+
       "Properties" : {
         "GroupDescription" : "Enable SSH access via port 22",
+        "VpcId": "vpc-7c5f6905",
+
         "SecurityGroupIngress" : [ {
           "IpProtocol" : "tcp",
+     
           "FromPort" : "22",
           "ToPort" : "22",
           "CidrIp" : "0.0.0.0/0"
